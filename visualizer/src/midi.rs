@@ -2,10 +2,11 @@ extern crate midir;
 
 use std::error::Error;
 use std::io::stdin;
+use std::sync::mpsc::Sender;
 
 use midir::{Ignore, MidiInput};
 
-pub fn run_midi() -> Result<(), Box<dyn Error>> {
+pub fn run_midi(tx: Sender<(u8, u8)>) -> Result<(), Box<dyn Error>> {
     let mut input = String::new();
 
     let mut midi_in = MidiInput::new("midir reading input")?;
@@ -23,12 +24,6 @@ pub fn run_midi() -> Result<(), Box<dyn Error>> {
         }
     };
 
-    println!("\nOpening connection");
-    let in_port_name = midi_in.port_name(in_port)?;
-
-    const NOTE_ON: u8 = 0x9;
-    const NOTE_OFF: u8 = 0x8;
-
     let _conn_in = midi_in.connect(
         in_port,
         "midir-read-input",
@@ -41,9 +36,7 @@ pub fn run_midi() -> Result<(), Box<dyn Error>> {
                 Some(e) => e,
                 None => return,
             };
-            if *status == NOTE_ON {
-            } else if *status == NOTE_OFF {
-            }
+            tx.send((*status, *note)).unwrap();
         },
         (),
     )?;
@@ -51,6 +44,5 @@ pub fn run_midi() -> Result<(), Box<dyn Error>> {
     input.clear();
     stdin().read_line(&mut input)?;
 
-    println!("Closing connection");
     Ok(())
 }

@@ -1,8 +1,8 @@
 extern crate sdl2;
 
+use crate::bar;
+
 pub struct Graphics {
-    context: sdl2::Sdl,
-    video_subsystem: sdl2::VideoSubsystem,
     canvas: sdl2::render::Canvas<sdl2::video::Window>,
     event_pump: sdl2::EventPump,
 }
@@ -26,12 +26,7 @@ impl Graphics {
 
         let event_pump = context.event_pump()?;
 
-        Ok(Graphics {
-            context,
-            video_subsystem,
-            canvas,
-            event_pump,
-        })
+        Ok(Graphics { canvas, event_pump })
     }
 
     pub fn has_quit(&mut self) -> bool {
@@ -52,11 +47,25 @@ impl Graphics {
         return quit;
     }
 
-    pub fn draw_bar(&mut self) {
+    pub fn draw_bars(&mut self, bars: &Vec<bar::Bar>) {
         self.canvas
             .set_draw_color(sdl2::pixels::Color::RGB(255, 0, 0));
+        let (width, height) = self.canvas.output_size().unwrap();
+        let bar_width = width / (bars.len() as u32);
+        let mut current_bar = 0;
+        for bar in bars.iter() {
+            if bar.is_active() {
+                let x = (bar_width * current_bar) as i32;
+                let bar_height = ((bar.get_value() as f64 / 1000.0) * height as f64) as u32;
+                let y = (height - bar_height) as i32;
+                self.canvas
+                    .fill_rect(sdl2::rect::Rect::new(x, y, bar_width, bar_height))
+                    .unwrap();
+            }
+            current_bar += 1
+        }
         self.canvas
-            .fill_rect(sdl2::rect::Rect::new(10, 10, 780, 580));
+            .set_draw_color(sdl2::pixels::Color::RGB(0, 0, 0));
     }
 
     pub fn clear_canvas(&mut self) {
