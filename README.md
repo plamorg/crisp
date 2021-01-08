@@ -1,3 +1,8 @@
+<p align="center">
+  <a href="" rel="noopener">
+ <img src="assets/crisp.png" alt="crisp logo"></a>
+</p>
+
 <h3 align="center">crisp</h3>
 
 <div align="center">
