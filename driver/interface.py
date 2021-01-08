@@ -2,26 +2,24 @@
 import serial
 import midi
 
-PORT = ""
+PORT = "/dev/tty.usbmodem14201"
 BAUD_RATE = 9600
 SER = serial.Serial(PORT, BAUD_RATE)
 
 
 def get_serial_input():
     """Returns serial input delimited by space"""
-    return SER.readline().split("\\s+")
+    return SER.readline().decode('utf-8').strip().split(' ')
 
 
 def main():
     """Repeatedly request for input and call play note function"""
-    try:
+    while True:
         serial_input = get_serial_input()
+        print(serial_input)
         note = serial_input[0]
         action = serial_input[1]
-        midi.play_note(note, action)
-    except KeyboardInterrupt:
-        pass
-
+        midi.play_note(int(note), action)
 
 if __name__ == "__main__":
     main()
