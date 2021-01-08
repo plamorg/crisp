@@ -1,4 +1,4 @@
-const int specialPins[4] = {22, 24, 26, 28};
+const int specialPins[4] = {24, 22, 26, 28};
 const int nodePins[8] = {30, 32, 33, 36, 39, 40, 42, 44};
 const int notes[7][8] = {
     {24, 26, 27, 29, 31, 33, 35, 36},
@@ -12,12 +12,22 @@ const int notes[7][8] = {
 
 const int MINREG = 0, MAXREG = 6;
 
-int noteStates[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+int noteStates[200];
 int octaveStates[2] = {0, 0};   // up, down
+int modStates[2] = {0, 0};  // sharp, flat
 
 int sharp = 0, flat = 0;
 
 int reg = 3;
+
+void clearReg() {
+    for (int i=0; i<200; i++) {
+        if (!noteStates[i]) continue;
+        noteStates[i] = 0;
+        Serial.print(i);
+        Serial.println(" off");
+    }
+}
 
 void setup() {
     // put your setup code here, to run once:
@@ -39,33 +49,42 @@ void loop() {
     for (int i=0; i<8; i++) {
         // note button states
         buttonState = digitalRead(nodePins[i]);
-        if (buttonState == HIGH && !noteStates[i]) {
-            // send "on" for notes[reg][i] + sharp - flat
-            Serial.print(notes[reg][i] + sharp - flat);
+        int note = notes[reg][i] + sharp - flat;
+        if (buttonState == HIGH && !noteStates[note]) {
+            // send "on"
+            Serial.print(note);
             Serial.println(" on");
-            noteStates[i] = 1;
-        } else if (buttonState == LOW && noteStates[i]) {
-            // send "off" for notes[reg][i] + sharp - flat
-            Serial.print(notes[reg][i] + sharp - flat);
+            noteStates[note] = 1;
+        } else if (buttonState == LOW && noteStates[note]) {
+            // send "off"
+            Serial.print(note);
             Serial.println(" off");
-            noteStates[i] = 0;
+            noteStates[note] = 0;
         }
     }
 
     // special button state - sharp
     buttonState = digitalRead(specialPins[0]);
-    if (buttonState == HIGH) {
+    if (buttonState == HIGH && !modStates[0]) {
+        modStates[0] = 1;
         sharp = 1;
-    } else if (buttonState == LOW) {
+        clearReg();
+    } else if (buttonState == LOW && modStates[0]) {
+        modStates[0] = 0;
         sharp = 0;
+        clearReg();
     }
 
     // special button state - flat
     buttonState = digitalRead(specialPins[1]);
-    if (buttonState == HIGH) {
+    if (buttonState == HIGH && !modStates[1]) {
+        modStates[1] = 1;
         flat = 1;
-    } else if (buttonState == LOW) {
+        clearReg();
+    } else if (buttonState == LOW && modStates[1]) {
+        modStates[1] = 0;
         flat = 0;
+        clearReg();
     }
 
     // special button state - octave up
@@ -74,8 +93,10 @@ void loop() {
         octaveStates[0] = 1;
         reg++;
         reg = min(MAXREG, reg);
+        clearReg();
     } else if (buttonState == LOW && octaveStates[0]) {
         octaveStates[0] = 0;
+        clearReg();
     }
 
     // special button state - octave down
@@ -84,8 +105,10 @@ void loop() {
         octaveStates[1] = 1;
         reg--;
         reg = max(MINREG, reg);
+        clearReg();
     } else if (buttonState == LOW && octaveStates[1]) {
         octaveStates[1] = 0;
+        clearReg();
     }
     delay(50);
 }

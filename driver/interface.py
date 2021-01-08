@@ -16,7 +16,7 @@ def main():
     """Repeatedly request for input and call play note function"""
     while True:
         serial_input = get_serial_input()
-        print(serial_input)
+        # print(serial_input)
         note = serial_input[0]
         action = serial_input[1]
         midi.play_note(int(note), action)
