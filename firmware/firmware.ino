@@ -1,5 +1,5 @@
 const int specialPins[4] = {22, 24, 26, 28};
-const int nodePins[8] = {30, 32, 34, 36, 38, 40, 42, 44};
+const int nodePins[8] = {30, 32, 33, 36, 39, 40, 42, 44};
 const int notes[7][8] = {
     {24, 26, 27, 29, 31, 33, 35, 36},
     {36, 38, 40, 41, 43, 45, 47, 48},
@@ -40,13 +40,13 @@ void loop() {
         // note button states
         buttonState = digitalRead(nodePins[i]);
         if (buttonState == HIGH && !noteStates[i]) {
-            // send "on" for notes[reg][i] + sharp + flat
-            Serial.print(notes[reg][i] + sharp + flat);
+            // send "on" for notes[reg][i] + sharp - flat
+            Serial.print(notes[reg][i] + sharp - flat);
             Serial.println(" on");
             noteStates[i] = 1;
         } else if (buttonState == LOW && noteStates[i]) {
-            // send "off" for notes[reg][i] + sharp + flat
-            Serial.print(notes[reg][i] + sharp + flat);
+            // send "off" for notes[reg][i] + sharp - flat
+            Serial.print(notes[reg][i] + sharp - flat);
             Serial.println(" off");
             noteStates[i] = 0;
         }
