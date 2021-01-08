@@ -10,10 +10,7 @@ const MINIMUM_NOTE: u8 = 23;
 const MAXIMUM_NOTE: u8 = 109;
 
 fn get_bars() -> Vec<bar::Bar> {
-    let mut bars: Vec<bar::Bar> = Vec::new();
-    for i in MINIMUM_NOTE..MAXIMUM_NOTE + 1 {
-        bars.push(bar::Bar::new(i));
-    }
+    let bars = vec![bar::Bar::new(); (MAXIMUM_NOTE - MINIMUM_NOTE + 1) as usize];
     bars
 }
 

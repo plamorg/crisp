@@ -1,15 +1,14 @@
 use std::cmp;
 
+#[derive(Clone)]
 pub struct Bar {
-    note: u8,
     value: i16,
     active: bool,
 }
 
 impl Bar {
-    pub fn new(note: u8) -> Bar {
+    pub fn new() -> Bar {
         Bar {
-            note,
             value: 0,
             active: false,
         }
