@@ -13,17 +13,23 @@ const int notes[7][8] = {
 const int MINREG = 0, MAXREG = 6;
 
 int noteStates[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+int octaveStates[2] = {0, 0};   // up, down
+
+int sharp = 0, flat = 0;
 
 int reg = 3;
-int sharp = 0, flat = 0;
 
 void setup() {
     // put your setup code here, to run once:
+    Serial.begin(9600); // open serial port
+    
     for (int i : specialPins) {
-        pinMode(i, INPUT);  // all the buttons are input
+        pinMode(i, INPUT_PULLUP);  // all the buttons are input
     }
 
-    Serial.begin(9600); // open serial port
+    for (int i : nodePins) {
+        pinMode(i, INPUT_PULLUP);
+    }
 }
 
 int buttonState;
@@ -33,15 +39,13 @@ void loop() {
     for (int i=0; i<8; i++) {
         // note button states
         buttonState = digitalRead(nodePins[i]);
-        if (buttonState == HIGH) {
+        if (buttonState == HIGH && !noteStates[i]) {
             // send "on" for notes[reg][i] + sharp + flat
-            if (noteStates[i]) continue;
             Serial.print(notes[reg][i] + sharp + flat);
             Serial.println(" on");
             noteStates[i] = 1;
-        } else if (buttonState == LOW) {
+        } else if (buttonState == LOW && noteStates[i]) {
             // send "off" for notes[reg][i] + sharp + flat
-            if (!noteStates[i]) continue;
             Serial.print(notes[reg][i] + sharp + flat);
             Serial.println(" off");
             noteStates[i] = 0;
@@ -66,15 +70,22 @@ void loop() {
 
     // special button state - octave up
     buttonState = digitalRead(specialPins[2]);
-    if (buttonState == HIGH) {
+    if (buttonState == HIGH && !octaveStates[0]) {
+        octaveStates[0] = 1;
         reg++;
         reg = min(MAXREG, reg);
+    } else if (buttonState == LOW && octaveStates[0]) {
+        octaveStates[0] = 0;
     }
 
     // special button state - octave down
     buttonState = digitalRead(specialPins[3]);
-    if (buttonState == HIGH) {
+    if (buttonState == HIGH && !octaveStates[1]) {
+        octaveStates[1] = 1;
         reg--;
         reg = max(MINREG, reg);
+    } else if (buttonState == LOW && octaveStates[1]) {
+        octaveStates[1] = 0;
     }
+    delay(50);
 }
